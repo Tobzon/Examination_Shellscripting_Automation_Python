@@ -8,3 +8,4 @@
 #sammanställning av risker
 #generering av en rapport
 #följa strukturerad kodstandard med funktioner och tydlig dokumentation
+

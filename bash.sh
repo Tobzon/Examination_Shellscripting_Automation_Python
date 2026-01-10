@@ -25,15 +25,20 @@ fileCheck() {
 
 local file=$1
 
-if [ -e "$file"]; then
-    log "filen existerar"
+if [ ! -f "$file"]; then
+    log "FEL: Filen "$file" existerar inte "
 fi 
 
 if [ -r "$file"]; then 
-    log "filen går att läsa"
+    log "filen "$file" går att läsa"
+else
+    log "FEL: Filen "$file" går inte att läsa"
+    
 fi
 
 if [ -w "$file"]; then
-    log "filen går att redigera"
+    log "filen "$file" går att redigera"
+else
+    log "FEL: filen "$file" går inte att redigera"
 fi
 }
