@@ -20,3 +20,20 @@ log() {
 }
 
 
+
+fileCheck() {
+
+local file=$1
+
+if [ -e "$file"]; then
+    log "filen existerar"
+fi 
+
+if [ -r "$file"]; then 
+    log "filen går att läsa"
+fi
+
+if [ -w "$file"]; then
+    log "filen går att redigera"
+fi
+}
