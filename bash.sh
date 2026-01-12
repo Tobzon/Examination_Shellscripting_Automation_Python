@@ -19,6 +19,14 @@ log() {
     echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$1" | tee -a $logFile
 }
 
+checkSystemLogs() {
+
+local logSearch="/var/log/syslog"
+local words="error|fail|critical"
+
+# hämtar logs med error,fail,critical i syslog o skriver ner dom i en ny fil, -Ei gör så att man kan göra uttryck utan backslahes(E) och den är inte case-senseitive(i) 
+grep -Ei "$words" "$logSearch" > syslogs.log
+}
 
 
 fileCheck() {
