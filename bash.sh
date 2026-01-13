@@ -19,15 +19,33 @@ log() {
     echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$1" | tee -a $logFile
 }
 
+
+checkNetwork() {
+local threshold=100
+
+#listar upp alla tcp och udp sockets i numeric form, 1 per rad
+count=$(ss -ntu | wc -l)
+
+if((count > threshold)); then
+    log "Ovanligt många nätverksansutningar: $count"
+fi
+
+jounralctl -u sshd \
+    | grep -Ei "Accepted|Failed" \
+    | awk '{print $(NF-3)}' \
+    | sort -u > -a $logFile
+}
+
+
+
 checkSystemLogs() {
 
 local logSearch="/var/log/syslog"
 local words="error|fail|critical"
 
-# hämtar logs med error,fail,critical i syslog o skriver ner dom i en ny fil, -Ei gör så att man kan göra uttryck utan backslahes(E) och den är inte case-senseitive(i) 
+# hämtar logs med error,fail,critical i syslog o skriver ner dom i en ny fil, -Ei gör så att man kan göra uttryck utan backslahes(E,en slags regex användning) och den är inte case-senseitive(i) 
 grep -Ei "$words" "$logSearch" > syslogs.log
 }
-
 
 fileCheck() {
 
