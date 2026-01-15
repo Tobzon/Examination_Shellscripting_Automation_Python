@@ -7,9 +7,7 @@
 #använda moduler eller cmdlets strukturerat
 
 
-# ===============================================
-# Säkerhets- & Härdningskontroll med CSV-export
-# ===============================================
+
 
 $CsvPath = "C:\Users\tobbi\OneDrive\Skrivbord\Examination_Shellscripting_Automation_Python\SecurityReport.csv"
 $BOM = [System.Text.Encoding]::UTF8.GetPreamble()

@@ -84,11 +84,11 @@ checkSsh() {
     fi
 
     local hits
-    hits=$(journalctl -u sshd 2>/dev/null | grep -Ei "Accepted|Failed" | sort -u | wc -l)
+    hits=$(journalctl -u ssh 2>/dev/null | grep -Ei "Accepted|Failed" | sort -u | wc -l)
 
     if (( hits > 0 )); then
         warn "SSH-försök hittades ($hits)"
-        journalctl -u sshd | grep -Ei "Accepted|Failed" | sort -u >> "$logFile"
+        journalctl -u ssh | grep -Ei "Accepted|Failed" | sort -u >> "$logFile"
     else
         ok "Inga SSH-försök hittades"
         log "Inga SSH-försök"
