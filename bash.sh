@@ -29,6 +29,8 @@ fi
 # (()) ist för [] då det är säkrare för heltal
 if (( count > threshold )); then
     log "Ovanligt många nätverksanslutningar: "$count" "
+else
+    log "Nätverksanslutningar ser ut att vara under kontroll"    
 fi
 }
 
@@ -41,8 +43,8 @@ fi
 
 journalctl -u sshd \
     | grep -Ei "Accepted|Failed" \
-    | awk '{print $(NF-3)}' \
-    | sort -u >> "$logFile" || true
+    | sort -u >> "$logFile" || 
+    log "Det fanns inte ett SSH försök"
     
 }
 
