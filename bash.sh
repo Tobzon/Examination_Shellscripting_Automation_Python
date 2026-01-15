@@ -6,7 +6,7 @@ logFile="logs.log"
 
 log() {
     local msg="$1"
-    echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$msg" | tee -a $logFile
+    echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$msg" | tee -a "$logFile"
 }
 
 error_handler() {
@@ -21,13 +21,14 @@ trap error_handler ERR
 checkNetwork() {
 local threshold=100
 
-if ! count=$(ss -ntu 2>/dev/null | wc -l)
+if ! count=$(ss -ntu 2>/dev/null | wc -l); then
     log "FEL: kunde nite läsa nästverksanslutningar"
     return 1
+fi
 
 # (()) ist för [] då det är säkrare för heltal
-if (( $count -gt $threshold )); then
-    log "Ovanligt många nätverksanslutningar: $count"
+if (( count > threshold )); then
+    log "Ovanligt många nätverksanslutningar: "$count" "
 fi
 }
 
@@ -41,8 +42,8 @@ fi
 journalctl -u sshd \
     | grep -Ei "Accepted|Failed" \
     | awk '{print $(NF-3)}' \
-    | sort -u >> "$logFile" || \
-    log "FEL: kunde inte läsa ssh-loggar"
+    | sort -u >> "$logFile" || true
+    
 }
 
 checkUpdates() {
@@ -53,7 +54,7 @@ checkUpdates() {
         return 1
     fi
 
-    echo "$updates" | grep security >> "$logFile"
+    echo "$updates" | grep security >> "$logFile" || true
 
     if echo "$updates" | grep -q upgradable; then
         log "Det finns uppdateringar"
@@ -64,7 +65,7 @@ checkUpdates() {
 
 fileCheck() {
 
- local file="$1"
+ local file="${1:-}"
 
 if [[ -z "$file" ]]; then
     log "FEL: Ingen fil angiven"
@@ -90,5 +91,6 @@ main() {
     checkNetwork
     checkSsh
     checkUpdates
-    fileCheck 
+    fileCheck "/etc/passwd"
 }
+main
