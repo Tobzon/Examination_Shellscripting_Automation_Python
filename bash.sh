@@ -1,13 +1,45 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ===== FÄRGER =====
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+CYAN="\e[36m"
+MAGENTA="\e[35m"
+RESET="\e[0m"
+
+section() {
+    echo -e "\n${CYAN}========================================${RESET}"
+    echo -e "${CYAN} $1${RESET}"
+    echo -e "${CYAN}========================================${RESET}"
+}
+
+ok() {
+    echo -e "${GREEN}[OK]${RESET} $1"
+}
+
+warn() {
+    echo -e "${YELLOW}[VARNING]${RESET} $1"
+}
+
+fail() {
+    echo -e "${RED}[FEL]${RESET} $1"
+}
+
+info() {
+    echo -e "${MAGENTA}[INFO]${RESET} $1"
+}
+
+
 
 logFile="logs.log"
 
 log() {
     local msg="$1"
-    echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$msg" | tee -a "$logFile"
+    echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') - $msg" >> "$logFile"
 }
+
 
 error_handler() {
     log "FEL (${BASH_SOURCE[1]}:${BASH_LINENO[0]}): kommando misslyckades"
@@ -19,80 +51,108 @@ trap error_handler ERR
 
 #listar upp alla tcp och udp sockets i numeric form, 1 per rad
 checkNetwork() {
-local threshold=100
+    section "Nätverksanslutningar"
 
-if ! count=$(ss -ntu 2>/dev/null | wc -l); then
-    log "FEL: kunde nite läsa nästverksanslutningar"
-    return 1
-fi
+    local threshold=100
+    local count
 
-# (()) ist för [] då det är säkrare för heltal
-if (( count > threshold )); then
-    log "Ovanligt många nätverksanslutningar: "$count" "
-else
-    log "Nätverksanslutningar ser ut att vara under kontroll"    
-fi
+    if ! count=$(ss -ntu 2>/dev/null | wc -l); then
+        fail "Kunde inte läsa nätverksanslutningar"
+        log "FEL: kunde inte läsa nätverksanslutningar"
+        return 1
+    fi
+
+    info "Antal aktiva sockets: $count"
+
+    if (( count > threshold )); then
+        warn "Ovanligt många nätverksanslutningar ($count)"
+        log "VARNING: Ovanligt många nätverksanslutningar ($count)"
+    else
+        ok "Nätverksanslutningar ser normala ut"
+        log "Nätverksanslutningar OK ($count)"
+    fi
 }
+
 
 checkSsh() {
+    section "SSH-inloggningar"
 
-if ! command -v journalctl >/dev/null; then
+    if ! command -v journalctl >/dev/null; then
+        fail "journalctl saknas"
         log "FEL: journalctl saknas"
         return 1
-fi
+    fi
 
-journalctl -u sshd \
-    | grep -Ei "Accepted|Failed" \
-    | sort -u >> "$logFile" || 
-    log "Det fanns inte ett SSH försök"
-    
+    local hits
+    hits=$(journalctl -u sshd 2>/dev/null | grep -Ei "Accepted|Failed" | sort -u | wc -l)
+
+    if (( hits > 0 )); then
+        warn "SSH-försök hittades ($hits)"
+        journalctl -u sshd | grep -Ei "Accepted|Failed" | sort -u >> "$logFile"
+    else
+        ok "Inga SSH-försök hittades"
+        log "Inga SSH-försök"
+    fi
 }
 
+
 checkUpdates() {
- local updates
+    section "Systemuppdateringar"
+
+    local updates
 
     if ! updates=$(apt list --upgradable 2>/dev/null); then
+        fail "Kunde inte kontrollera uppdateringar"
         log "FEL: Kunde inte kontrollera uppdateringar"
         return 1
     fi
 
-    echo "$updates" | grep security >> "$logFile" || true
-
     if echo "$updates" | grep -q upgradable; then
-        log "Det finns uppdateringar"
+        warn "Det finns tillgängliga uppdateringar"
+        echo "$updates" | grep security >> "$logFile" || true
+        log "Uppdateringar finns"
     else
+        ok "Systemet är uppdaterat"
         log "Systemet är uppdaterat"
     fi
 }
 
+
 fileCheck() {
+    section "Filkontroll: $1"
 
- local file="${1:-}"
+    local file="${1:-}"
 
-if [[ -z "$file" ]]; then
-    log "FEL: Ingen fil angiven"
-    return 1
-fi
+    if [[ -z "$file" ]]; then
+        fail "Ingen fil angiven"
+        log "FEL: Ingen fil angiven"
+        return 1
+    fi
 
-if [[ ! -f "$file" ]]; then
-    log "FEL: Filen $file existerar inte"
-    return 1
-fi
+    if [[ ! -f "$file" ]]; then
+        fail "Filen existerar inte: $file"
+        log "FEL: Filen existerar inte: $file"
+        return 1
+    fi
 
-[[ -r "$file" ]] \
-    && log "Filen $file går att läsa" \
-    || log "FEL: Filen $file går inte att läsa"
+    [[ -r "$file" ]] \
+        && ok "Filen går att läsa" \
+        || fail "Filen går inte att läsa"
 
-[[ -w "$file" ]] \
-    && log "Filen $file går att redigera" \
-    || log "FEL: Filen $file går inte att redigera"
+    [[ -w "$file" ]] \
+        && warn "Filen är skrivbar (kontrollera rättigheter)" \
+        || ok "Filen är inte skrivbar"
 }
 
 
 main() {
+    section "LINUX SÄKERHETSRAPPORT"
+
     checkNetwork
     checkSsh
     checkUpdates
     fileCheck "/etc/passwd"
+
+    section "Rapport klar"
 }
 main
