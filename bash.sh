@@ -2,24 +2,21 @@
 
 set -euo pipefail
 
-#genomföra minst en säkerhetskontroll, exempelvis:
-#analys av systemloggar ✓
-#upptäckt av ovanlig nätverkstrafik ✓
-#kontroll av installerade paket och uppdateringsstatus ✓
-#innehålla strukturerad felhantering ✓
-#logga output i en fil ✓
-#följa best practice för shellscript 
-
-
 
 logFile="logs.log"
-
-
 
 log() {
     local msg="$1"
     echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') -$msg" | tee -a $logFile
 }
+
+error_handler() {
+    log "FEL (${BASH_SOURCE[1]}:${BASH_LINENO[0]}): kommando misslyckades"
+    exit 1
+}
+
+trap error_handler ERR
+
 
 #listar upp alla tcp och udp sockets i numeric form, 1 per rad
 checkNetwork() {
@@ -89,3 +86,10 @@ fi
     || log "FEL: Filen $file går inte att redigera"
 }
 
+
+main() {
+    checkNetwork
+    checkSsh
+    checkUpdates
+    fileCheck "/etc/passwd"
+}
