@@ -91,5 +91,5 @@ main() {
     checkNetwork
     checkSsh
     checkUpdates
-    fileCheck "/etc/passwd"
+    fileCheck 
 }
