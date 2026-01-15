@@ -1,0 +1,26 @@
+﻿"Category","SubCategory","Name","ObjectClass","Detail"
+"Privilegierade konton","Administrators","Tobzon\Administrator","User",""
+"Privilegierade konton","Administrators","TOBZON\tobbi","User",""
+"Privilegierade konton","Domain Admins","(Ej tillganglig)","","Fel: Group Domain Admins was not found."
+"Privilegierade konton","Enterprise Admins","(Ej tillganglig)","","Fel: Group Enterprise Admins was not found."
+"Privilegierade konton","Schema Admins","(Ej tillganglig)","","Fel: Group Schema Admins was not found."
+"Event Viewer","Privilegieforandring","","","Fel: No events were found that match the specified selection criteria."
+"Event Viewer","Misslyckade inloggningar","","","Fel: No events were found that match the specified selection criteria."
+"Event Viewer","Kontolasning","","","Fel: No events were found that match the specified selection criteria."
+"Event Viewer","Lyckade inloggningar","","","Fel: No events were found that match the specified selection criteria."
+"Policy","Losenordspolicy","","","Force user logoff how long after time expires?:       Never
+Minimum password age (days):                          0
+Maximum password age (days):                          42
+Minimum password length:                              0
+Length of password history maintained:                None
+Lockout threshold:                                    Never
+Lockout duration (minutes):                           30
+Lockout observation window (minutes):                 30
+Computer role:                                        WORKSTATION
+The command completed successfully."
+"Policy","UAC-status","","","EnableLUA=1, ConsentPromptBehaviorAdmin=5"
+"Windows Update","Saknade uppdateringar","Security Intelligence Update for Microsoft Defender Antivirus - KB2267602 (Version 1.443.691.0) - Current Channel (Broad)","","Kritikalitet="
+"Windows Update","Saknade uppdateringar","BenQ - LCD - BenQ RL2455","","Kritikalitet="
+"Windows Update","Saknade uppdateringar","Intel Corporation - Display - 31.0.101.3959","","Kritikalitet="
+"Windows Update","Saknade uppdateringar","Intel - net - 23.170.0.1","","Kritikalitet="
+"Windows Update","Saknade uppdateringar","Intel Corporation Driver Update (24.10.0.4)","","Kritikalitet="

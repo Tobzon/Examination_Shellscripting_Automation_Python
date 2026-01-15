@@ -15,6 +15,12 @@ import csv
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
+from datetime import datetime
+
 
 CSV_PATH = Path("SecurityReport.csv")
 LOG_PATH = Path("logs.log")
@@ -50,7 +56,7 @@ def read_csv():
         reader = csv.DictReader(f)
         rows.extend(reader)
 
-    ok(f"CSV inläst ({len(rows)} rader)")
+    ok(f"Windows logg inläst ({len(rows)} rader)")
     return rows
 
 # =========================
@@ -64,14 +70,14 @@ def read_log():
     with open(LOG_PATH, encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
 
-    ok(f"Logg inläst ({len(lines)} rader)")
+    ok(f"Linux logg inläst ({len(lines)} rader)")
     return lines
 
 # =========================
 # CSV-analys
 # =========================
 def analyze_csv(rows):
-    section("Analys av CSV-data")
+    section("Analys av Windows")
 
     categories = Counter(row["Category"] for row in rows)
     risks = [r for r in rows if "Saknade" in r["SubCategory"] or "Brandvägg" in r["Category"]]
@@ -90,7 +96,7 @@ def analyze_csv(rows):
 # Logg-analys
 # =========================
 def analyze_logs(lines):
-    section("Analys av loggdata")
+    section("Analys av Linux")
 
     errors = [l for l in lines if "FEL" in l]
     warnings = [l for l in lines if "VARNING" in l]
@@ -117,7 +123,6 @@ def summary(risks, errors, warnings):
     score -= len(risks) * 10
     score -= len(errors) * 15
     score -= len(warnings) * 5
-
     score = max(score, 0)
 
     if score >= 80:
@@ -126,6 +131,69 @@ def summary(risks, errors, warnings):
         warn(f"Säkerhetsnivå: MEDEL ({score}/100)")
     else:
         fail(f"Säkerhetsnivå: LÅG ({score}/100)")
+
+    return score
+
+
+
+def generate_pdf(csv_rows, risks, errors, warnings, score):
+    pdf_path = Path("Security_Report.pdf")
+
+    doc = SimpleDocTemplate(
+        str(pdf_path),
+        pagesize=A4,
+        rightMargin=2*cm,
+        leftMargin=2*cm,
+        topMargin=2*cm,
+        bottomMargin=2*cm
+    )
+
+    styles = getSampleStyleSheet()
+    content = []
+
+    # Titel
+    content.append(Paragraph("<b>Säkerhetsrapport</b>", styles["Title"]))
+    content.append(Spacer(1, 12))
+
+    content.append(
+        Paragraph(
+            f"Genererad: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            styles["Normal"]
+        )
+    )
+    content.append(Spacer(1, 12))
+
+    # Sammanfattning
+    content.append(Paragraph("<b>Sammanfattning</b>", styles["Heading2"]))
+    content.append(Paragraph(f"Säkerhetspoäng: {score}/100", styles["Normal"]))
+    content.append(Paragraph(f"Kritiska fynd (Windows): {len(risks)}", styles["Normal"]))
+    content.append(Paragraph(f"Fel i Linux: {len(errors)}", styles["Normal"]))
+    content.append(Paragraph(f"Varningar i Linux: {len(warnings)}", styles["Normal"]))
+    content.append(Spacer(1, 12))
+
+    # CSV-statistik
+    content.append(Paragraph("<b>Windows – kategorier</b>", styles["Heading2"]))
+    categories = Counter(row["Category"] for row in csv_rows)
+    for cat, count in categories.items():
+        content.append(Paragraph(f"- {cat}: {count}", styles["Normal"]))
+
+    content.append(Spacer(1, 12))
+
+    # Kritiska fynd
+    if risks:
+        content.append(Paragraph("<b>Kritiska fynd</b>", styles["Heading2"]))
+        for r in risks:
+            content.append(
+                Paragraph(
+                    f"{r['Category']} | {r['SubCategory']} | {r['Detail']}",
+                    styles["Normal"]
+                )
+            )
+
+    doc.build(content)
+
+    print(f"\n[OK] PDF genererad: {pdf_path.resolve()}")
+
 
 # =========================
 # MAIN
@@ -139,9 +207,12 @@ def main():
     risks = analyze_csv(csv_rows)
     errors, warnings = analyze_logs(log_lines)
 
-    summary(risks, errors, warnings)
+    score = summary(risks, errors, warnings)
+
+    generate_pdf(csv_rows, risks, errors, warnings, score)
 
     section("Rapport klar")
+
 
 if __name__ == "__main__":
     main()

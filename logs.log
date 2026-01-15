@@ -1,0 +1,19 @@
+2026-01-15 19:36:43 - Nätverksanslutningar OK (3)
+Dec 16 08:27:15 Home sshd-session[1246711]: Accepted password for ola from 192.168.50.26 port 26583 ssh2
+Dec 18 11:09:18 Home sshd-session[1370516]: Accepted password for ola from 192.168.50.26 port 6475 ssh2
+Dec 18 12:31:01 Home sshd-session[1374040]: Accepted password for ola from 192.168.50.26 port 28016 ssh2
+Dec 22 13:18:11 Home sshd-session[1523995]: Accepted password for ola from 192.168.50.26 port 34509 ssh2
+Dec 22 20:03:38 Home sshd-session[1536513]: Accepted password for ola from 192.168.50.26 port 28233 ssh2
+Jan 06 10:05:08 Home sshd-session[1529]: Accepted password for ola from 192.168.50.26 port 47216 ssh2
+Jan 08 09:13:01 Home sshd-session[49838]: Accepted password for ola from 192.168.50.26 port 45118 ssh2
+Jan 08 15:57:02 Home sshd-session[58540]: Accepted password for ola from 192.168.50.26 port 19710 ssh2
+Jan 08 16:09:37 Home sshd-session[58980]: Failed none for invalid user test from 192.168.50.26 port 23393 ssh2
+Jan 08 16:09:40 Home sshd-session[58980]: Failed password for invalid user test from 192.168.50.26 port 23393 ssh2
+Jan 08 16:09:41 Home sshd-session[58980]: Failed password for invalid user test from 192.168.50.26 port 23393 ssh2
+Jan 08 16:09:53 Home sshd-session[58985]: Accepted password for ola from 192.168.50.26 port 23414 ssh2
+Jan 09 07:06:20 Home sshd-session[73996]: Accepted password for ola from 192.168.50.26 port 51279 ssh2
+Jan 14 12:29:57 Home sshd-session[213147]: Accepted password for ola from 192.168.50.26 port 34996 ssh2
+Jan 15 10:49:30 Home sshd-session[248143]: Accepted password for ola from 192.168.50.26 port 50517 ssh2
+Jan 15 11:29:00 Home sshd-session[250047]: Accepted password for ola from 192.168.50.26 port 10211 ssh2
+Jan 15 15:16:24 Home sshd-session[5745]: Accepted password for ola from 192.168.50.26 port 61685 ssh2
+2026-01-15 19:36:44 - Uppdateringar finns
