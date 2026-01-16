@@ -9,6 +9,7 @@ CYAN="\e[36m"
 MAGENTA="\e[35m"
 RESET="\e[0m"
 
+# Skriver ut en tydlig sektionsrubrik, tar emot en sträng som rubrik
 section() {
     echo -e "\n${CYAN}========================================${RESET}"
     echo -e "${CYAN} $1${RESET}"
@@ -35,12 +36,13 @@ info() {
 
 logFile="logs.log"
 
+#Loggar meddelande till logfilen med svensk tidsformat
 log() {
     local msg="$1"
     echo "$(LC_TIME=sv_SE.UTF-8 date '+%F %T') - $msg" >> "$logFile"
 }
 
-
+#Global felhanterare som triggas om ett kommando misslyckas
 error_handler() {
     log "FEL (${BASH_SOURCE[1]}:${BASH_LINENO[0]}): kommando misslyckades"
     exit 1
@@ -73,7 +75,7 @@ checkNetwork() {
     fi
 }
 
-
+# Kontrollerar SSH-inloggningar via systemd journal, letar efter både lyckade och misslyckade försök
 checkSsh() {
     section "SSH-inloggningar"
 
@@ -95,7 +97,7 @@ checkSsh() {
     fi
 }
 
-
+# Kontrollerar om systemuppdateringar finns tillgängliga
 checkUpdates() {
     section "Systemuppdateringar"
 
@@ -117,7 +119,10 @@ checkUpdates() {
     fi
 }
 
-
+# Kontrollerar en specifik fil:
+# - att den finns
+# - att den går att läsa
+# - om den är skrivbar (kan vara en säkerhetsrisk)
 fileCheck() {
     section "Filkontroll: $1"
 
@@ -144,7 +149,7 @@ fileCheck() {
         || ok "Filen är inte skrivbar"
 }
 
-
+# Huvudfunktionen som kör hela skriptet i rätt ordning
 main() {
     section "LINUX SÄKERHETSRAPPORT"
 

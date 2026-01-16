@@ -1,22 +1,15 @@
-#automatisera minst en säkerhetsrelaterad funktion, exempelvis:
-#kontroll av privilegierade konton
-#analys av Event Viewer
-#härdning av settings (t.ex. firewall, audit policies)
-#uppdateringsstatus
-#inkludera validering, felhantering, beskrivande loggning
-#använda moduler eller cmdlets strukturerat
-
-
 
 
 $CsvPath = "C:\Users\tobbi\OneDrive\Skrivbord\Examination_Shellscripting_Automation_Python\SecurityReport.csv"
+
+# UTF-8 BOM för att säkerställa korrekt teckenkodning i Excel
 $BOM = [System.Text.Encoding]::UTF8.GetPreamble()
 
-# ----------------------------
-# 1. Privilegierade konton
-# ----------------------------
+
+# Kontrollerar medlemmar i privilegierade grupper
 function Check-Users {
     $List = @()
+    # Grupper som anses säkerhetskritiska
     $PrivGroups = @("Administrators","Domain Admins","Enterprise Admins","Schema Admins")
     foreach ($Group in $PrivGroups) {
         try {
@@ -44,9 +37,7 @@ function Check-Users {
     return $List
 }
 
-# ----------------------------
-# 2. Event Viewer
-# ----------------------------
+# Läser säkerhetsloggar från Event Viewer, kontrollerar specifika event-ID:n de senaste 7 dagarna
 function Check-EventViewer {
     $List = @()
     $Events = @{
@@ -100,9 +91,8 @@ function Check-EventViewer {
     return $List
 }
 
-# ----------------------------
-# 3. Säkerhetspolicys
-# ----------------------------
+
+# Kontrollerar lösenordspolicy och UAC-inställningar
 function Check-Policies {
     $List = @()
     try {
@@ -149,9 +139,8 @@ function Check-Policies {
     return $List
 }
 
-# ----------------------------
-# 4. Windows Update
-# ----------------------------
+
+# Kontrollerar om det finns ej installerade Windows-uppdateringar
 function Check-Updates {
     $List = @()
     try {
@@ -191,10 +180,7 @@ function Check-Updates {
     return $List
 }
 
-
-# ----------------------------
-# 5. Skriv CSV
-# ----------------------------
+# Skriver resultatet till CSV med UTF-8 BOM
 function Write-CSV {
     param($Results)
     try {
@@ -207,9 +193,7 @@ function Write-CSV {
     }
 }
 
-# ----------------------------
-# 7. Main
-# ----------------------------
+# Huvudfunktion som kör alla kontroller
 function Main {
     try {
         $Results = @()
@@ -227,13 +211,14 @@ function Main {
 
 # Kör scriptet
 Main
-$CsvPath = "C:\Users\tobbi\OneDrive\Skrivbord\Examination_Shellscripting_Automation_Python\SecurityReport.csv"
 
+# Verifierar att CSV-filen skapades
 if (-not (Test-Path $CsvPath)) {
     Write-Host "CSV-filen hittades inte: $CsvPath" -ForegroundColor Red
     exit
 }
 
+# Läser in CSV-data
 $Data = Import-Csv -Path $CsvPath -Encoding UTF8
 
 Clear-Host

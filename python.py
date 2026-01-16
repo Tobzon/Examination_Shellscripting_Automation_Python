@@ -1,14 +1,3 @@
-#bearbeta säkerhetsdata, exempelvis:
-#processlistor
-#loggfiler
-#nätverksdata
-#API-anrop mot en central säkerhetsplattform
-#producera en analys, t.ex.:
-#identifiering av anomalier
-#sammanställning av risker
-#generering av en rapport
-#följa strukturerad kodstandard med funktioner och tydlig dokumentation
-
 
 #!/usr/bin/env python3
 import csv
@@ -21,8 +10,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from datetime import datetime
 
-
+# Förväntad CSV-rapport från Windows-scriptet
 CSV_PATH = Path("SecurityReport.csv")
+
+# Loggfil från Linux-scriptet
 LOG_PATH = Path("logs.log")
 
 # ===== FÄRGER =====
@@ -33,6 +24,7 @@ CYAN    = "\033[36m"
 MAGENTA = "\033[35m"
 RESET   = "\033[0m"
 
+# Skriver ut en tydlig sektionsrubrik
 def section(title):
     print(f"\n{CYAN}{'='*50}{RESET}")
     print(f"{CYAN}{title}{RESET}")
@@ -43,9 +35,8 @@ def warn(msg):  print(f"{YELLOW}[VARNING]{RESET} {msg}")
 def fail(msg):  print(f"{RED}[FEL]{RESET} {msg}")
 def info(msg):  print(f"{MAGENTA}[INFO]{RESET} {msg}")
 
-# =========================
-# Läs CSV
-# =========================
+
+# Läser in CSV, avslutar programmet om CSV saknas
 def read_csv():
     if not CSV_PATH.exists():
         fail(f"CSV-filen saknas: {CSV_PATH}")
@@ -59,9 +50,8 @@ def read_csv():
     ok(f"Windows logg inläst ({len(rows)} rader)")
     return rows
 
-# =========================
-# Läs logg
-# =========================
+
+# Läser Linux-loggfilen
 def read_log():
     if not LOG_PATH.exists():
         warn("Loggfil saknas hoppar över logganalys")
@@ -73,9 +63,7 @@ def read_log():
     ok(f"Linux logg inläst ({len(lines)} rader)")
     return lines
 
-# =========================
-# CSV-analys
-# =========================
+# Analyserar Windows-resultat
 def analyze_csv(rows):
     section("Analys av Windows")
 
@@ -92,9 +80,8 @@ def analyze_csv(rows):
 
     return risks
 
-# =========================
-# Logg-analys
-# =========================
+
+# Analyserar Linux-loggen
 def analyze_logs(lines):
     section("Analys av Linux")
 
@@ -113,9 +100,11 @@ def analyze_logs(lines):
 
     return errors, warnings
 
-# =========================
-# Sammanfattning
-# =========================
+
+# Skapar ett säkerhetsbetyg baserat på:
+# - Windows-risker
+# - Linux-fel
+# - Linux-varningar
 def summary(risks, errors, warnings):
     section("Samlad bedömning")
 
@@ -135,7 +124,7 @@ def summary(risks, errors, warnings):
     return score
 
 
-
+# Skapar en PDF-rapport med sammanfattning och statistik
 def generate_pdf(csv_rows, risks, errors, warnings, score):
     pdf_path = Path("Security_Report.pdf")
 
@@ -179,7 +168,7 @@ def generate_pdf(csv_rows, risks, errors, warnings, score):
 
     content.append(Spacer(1, 12))
 
-    # Kritiska fynd
+    # Lista kritiska fynd
     if risks:
         content.append(Paragraph("<b>Kritiska fynd</b>", styles["Heading2"]))
         for r in risks:
@@ -190,14 +179,13 @@ def generate_pdf(csv_rows, risks, errors, warnings, score):
                 )
             )
 
+     # Skapar PDF-filen
     doc.build(content)
 
     print(f"\n[OK] PDF genererad: {pdf_path.resolve()}")
 
 
-# =========================
-# MAIN
-# =========================
+# Programstart
 def main():
     section("SAMMANSLAGEN SÄKERHETSRAPPORT")
 
@@ -213,6 +201,6 @@ def main():
 
     section("Rapport klar")
 
-
+# Startpunkt för scriptet
 if __name__ == "__main__":
     main()
